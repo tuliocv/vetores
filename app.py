@@ -763,9 +763,11 @@ with t_rank:
 with t_teacher:
     st.subheader("👨‍🏫 Painel do professor")
     st.caption("Use para fechamento da aula: identificar questões com maior erro e retomar conceitos.")
-    password = st.text_input("Código do professor", type="password", placeholder="Digite: prof")
-    if password != "prof":
-        st.info("Digite o código para visualizar os dados da turma.")
+    PROFESSOR_PASSWORD = st.secrets.get("PROFESSOR_PASSWORD", "prof")
+    password = st.text_input("Código do professor", type="password")
+    if password != PROFESSOR_PASSWORD:
+    st.info("Digite o código do professor para visualizar o painel.")
+    st.stop()
     else:
         df_resp = safe_read_csv(RESPONSES_FILE, RESPONSE_COLUMNS)
         if df_resp.empty:
