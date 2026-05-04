@@ -6,27 +6,39 @@ from pathlib import Path
 import streamlit as st
 
 # =========================
-# CONFIGURAÇÃO TEMÁTICA
+# CONFIGURAÇÃO DO REINO DO COGUMELO
 # =========================
 st.set_page_config(page_title="Mario Vector Adventure", page_icon="🍄", layout="centered")
-st.title("🍄 Mario Vector Adventure: Java Edition")
-st.caption("Domine os Arrays (Vetores) e ajude o Mario a resgatar a lógica perdida!")
+
+# Estilo para simular um tom mais "gamer"
+st.markdown("""
+    <style>
+    .main { background-color: #f0f2f6; }
+    .stButton>button { width: 100%; border-radius: 5px; height: 3em; background-color: #e74c3c; color: white; font-weight: bold; }
+    .stButton>button:hover { background-color: #c0392b; border: 2px solid #f1c40f; }
+    </style>
+    """, unsafe_allow_value=True)
+
+st.title("🍄 Mario Vector Adventure")
+st.subheader("Arrays em Java: A Missão de Resgate")
+st.caption(f"Período de Avaliação A1 | Hoje: {datetime.now().strftime('%d/%m/%Y')}")
 
 # =========================
-# STORAGE (CSV) - Persistência
+# PERSISTÊNCIA DE DADOS (CSV)
 # =========================
-DATA_DIR = Path("data_mario")
+DATA_DIR = Path("data_mario_v2")
 DATA_DIR.mkdir(parents=True, exist_ok=True)
-SCORES_FILE = DATA_DIR / "mario_scores.csv"
-ANSWERS_FILE = DATA_DIR / "mario_answers.csv"
-PROGRESS_FILE = DATA_DIR / "mario_progress.csv"
-
-SCORES_HEADERS = ["timestamp_utc", "student_name", "base_correct", "final_points", "total", "percent", "max_streak"]
-ANS_HEADERS = ["timestamp_utc", "student_name", "question_id", "level", "is_correct"]
-PROGRESS_HEADERS = ["timestamp_utc", "student_name", "q_index", "total", "base_correct", "final_points", "status"]
+SCORES_FILE = DATA_DIR / "scores.csv"
+ANSWERS_FILE = DATA_DIR / "answers.csv"
+PROGRESS_FILE = DATA_DIR / "progress.csv"
 
 def ensure_files():
-    for p, h in [(SCORES_FILE, SCORES_HEADERS), (ANSWERS_FILE, ANS_HEADERS), (PROGRESS_FILE, PROGRESS_HEADERS)]:
+    files_headers = [
+        (SCORES_FILE, ["ts", "name", "correct", "points", "total", "percent", "streak"]),
+        (ANSWERS_FILE, ["ts", "name", "qid", "level", "is_correct"]),
+        (PROGRESS_FILE, ["ts", "name", "idx", "total", "correct", "points", "status"])
+    ]
+    for p, h in files_headers:
         if not p.exists():
             with open(p, "w", newline="", encoding="utf-8") as f:
                 csv.writer(f).writerow(h)
@@ -34,347 +46,400 @@ def ensure_files():
 ensure_files()
 
 # =========================
-# QUESTÕES (20 EXERCÍCIOS)
+# BANCO DE QUESTÕES (20 ITENS)
 # =========================
-# Baseado na Aula 12: Vetores, Índices e Loops
 QUESTIONS = [
-    # --- FÁCIL (Mundo 1: Green Hill Road) ---
+    # MUNDO 1 - FÁCIL
     {
         "id": "M1-1", "level": "Fácil",
-        "prompt": "O Mario criou um vetor: int[] moedas = {10, 20, 30}. Qual o valor no índice 0?",
-        "options": ["0", "10", "20", "30"],
-        "answer": "10",
+        "prompt": "O Mario guardou moedas em um vetor: `int[] bau = {10, 20, 30, 40};`. Qual o valor de `bau[1]`?",
+        "options": ["10", "20", "30", "40"],
+        "answer": "20",
         "rationale": {
-            "0": "❌ O índice começa em 0, mas o valor lá é o primeiro elemento.",
-            "10": "✅ Wahoo! Em Java, o primeiro elemento está na posição 0.",
-            "20": "❌ 20 está no índice 1.",
-            "30": "❌ 30 está no índice 2."
+            "10": "❌ Quase! O 10 está no índice 0. Lembre-se: o índice começa em zero.",
+            "20": "✅ Wahoo! O índice 1 aponta para a segunda gaveta do nosso armário.",
+            "30": "❌ Errado. O 30 está no índice 2.",
+            "40": "❌ Errado. O 40 está no índice 3 (última posição)."
         },
-        "tip": "Arrays em Java são 'zero-indexed'."
+        "tip": "Arrays são indexados em 0. O primeiro é bau[0], o segundo é bau[1]."
     },
     {
         "id": "M1-2", "level": "Fácil",
-        "prompt": "Como o Luigi pode descobrir o tamanho total do vetor 'itens'?",
-        "options": ["itens.size()", "itens.length", "itens.count", "itens.capacity"],
-        "answer": "itens.length",
+        "prompt": "Para criar um novo armário (vetor) de 10 gavetas para guardar cogumelos (inteiros), como o Luigi deve escrever?",
+        "options": ["int[] itens = new int[10];", "int itens = new int[10];", "int[10] itens = new int[];", "itens = int[10];"],
+        "answer": "int[] itens = new int[10];",
         "rationale": {
-            "itens.size()": "❌ .size() é usado em listas, não em arrays simples.",
-            "itens.length": "✅ Correto! O atributo .length retorna o número de gavetas[cite: 1].",
-            "itens.count": "❌ Não existe este atributo para vetores em Java.",
-            "itens.capacity": "❌ Termo incorreto para Java."
+            "int[] itens = new int[10];": "✅ Perfeito! Tipo[] nome = new Tipo[tamanho][cite: 1].",
+            "int itens = new int[10];": "❌ Falta o [] no tipo para indicar que é um vetor.",
+            "int[10] itens = new int[];": "❌ O tamanho deve ser definido na inicialização (lado direito).",
+            "itens = int[10];": "❌ Sintaxe inválida em Java."
         },
-        "tip": "O length é um atributo, não um método (não tem parênteses)."
+        "tip": "Sempre use colchetes [] para declarar estruturas compostas homogêneas[cite: 1]."
     },
     {
         "id": "M1-3", "level": "Fácil",
-        "prompt": "Se um vetor tem length = 5, qual o índice da última gaveta?",
-        "options": ["5", "6", "4", "0"],
-        "answer": "4",
+        "prompt": "Se um vetor 'moedas' tem 100 elementos, qual o índice do último elemento?",
+        "options": ["100", "99", "1", "0"],
+        "answer": "99",
         "rationale": {
-            "5": "❌ Se começar em 0, o 5 está fora dos limites!",
-            "4": "✅ Isso! O último índice é sempre length - 1[cite: 1].",
-            "0": "❌ Este é o primeiro índice."
+            "100": "❌ Mamma Mia! O índice 100 estaria fora dos limites (ArrayIndexOutOfBounds).",
+            "99": "✅ Correto! Como começa em 0, o último é sempre tamanho - 1[cite: 1].",
+            "1": "❌ Este seria apenas o segundo elemento.",
+            "0": "❌ Este é o índice do primeiro elemento."
         },
-        "tip": "Sempre subtraia 1 do total para achar o último índice."
+        "tip": "Último índice = length - 1."
     },
     {
         "id": "M1-4", "level": "Fácil",
-        "prompt": "Um vetor 'homogêneo' significa que:",
-        "options": ["Aceita int e String juntos", "Todos os dados são do mesmo tipo", "O tamanho muda sozinho", "Só aceita números"],
-        "answer": "Todos os dados são do mesmo tipo",
+        "prompt": "O que significa dizer que um vetor é uma estrutura 'homogênea'?",
+        "options": ["Pode guardar int e String juntos", "Guarda apenas elementos do mesmo tipo", "O tamanho muda dinamicamente", "Só guarda números positivos"],
+        "answer": "Guarda apenas elementos do mesmo tipo",
         "rationale": {
-            "Aceita int e String juntos": "❌ Isso seria heterogêneo.",
-            "Todos os dados são do mesmo tipo": "✅ Correto! Todos na mesma 'gaveta' devem ser iguais[cite: 1].",
-            "O tamanho muda sozinho": "❌ Vetores têm tamanho fixo após criados."
+            "Pode guardar int e String juntos": "❌ Isso seria heterogêneo. Vetores Java são rígidos!",
+            "Guarda apenas elementos do mesmo tipo": "✅ Exato! Todas as 'gavetas' guardam o mesmo tipo de dado[cite: 1].",
+            "O tamanho muda dinamicamente": "❌ Vetores têm tamanho fixo após criados.",
+            "Só guarda números positivos": "❌ O tipo define o dado, não o sinal (pode ser int negativo)."
         },
-        "tip": "Pense no armário da aula: se é de sapatos, só entra sapatos[cite: 1]."
+        "tip": "Se o armário é de 'double', só entram valores 'double'[cite: 1]."
     },
     {
         "id": "M1-5", "level": "Fácil",
-        "prompt": "Qual a forma correta de declarar um vetor de decimais?",
-        "options": ["double medias[]", "double[] medias", "array medias", "vector medias"],
-        "answer": "double[] medias",
+        "prompt": "Como descobrir quantas gavetas (tamanho) tem o vetor 'inventario'?",
+        "options": ["inventario.length", "inventario.size()", "inventario.count", "inventario.tamanho"],
+        "answer": "inventario.length",
         "rationale": {
-            "double[] medias": "✅ Padrão Java recomendado!",
-            "double medias[]": "⚠️ Funciona, mas não é a convenção moderna.",
-            "array medias": "❌ 'array' não é uma palavra reservada de tipo."
+            "inventario.length": "✅ Isso! .length é o atributo que nos diz o tamanho do vetor[cite: 1].",
+            "inventario.size()": "❌ .size() é usado em ArrayLists, não em vetores simples.",
+            "inventario.count": "❌ Não existe esse atributo em Java.",
+            "inventario.tamanho": "❌ Java usa termos em inglês: length."
         },
-        "tip": "O tipo seguido de [] é a marca registrada do vetor[cite: 1]."
+        "tip": "Dica: length em vetores não tem parênteses ( ) pois é um atributo, não um método."
     },
 
-    # --- MÉDIO (Mundo 2: Desert Land) ---
+    # MUNDO 2 - MÉDIO
     {
         "id": "M2-1", "level": "Médio",
-        "prompt": "O que acontece ao executar: System.out.println(vetor[5]) se o length for 5?",
-        "options": ["Imprime 0", "Imprime o último valor", "Erro: ArrayIndexOutOfBounds", "Imprime nulo"],
-        "answer": "Erro: ArrayIndexOutOfBounds",
+        "prompt": "O Bowser tentou rodar: `int[] v = {5, 10}; System.out.println(v[2]);`. O que acontece?",
+        "options": ["Imprime 0", "Imprime 10", "Erro: ArrayIndexOutOfBoundsException", "Imprime nulo"],
+        "answer": "Erro: ArrayIndexOutOfBoundsException",
         "rationale": {
-            "Erro: ArrayIndexOutOfBounds": "✅ Mamma Mia! O índice 5 não existe se o tamanho é 5 (vai de 0 a 4)[cite: 1].",
-            "Imprime o último valor": "❌ O último seria o índice 4."
+            "Imprime 0": "❌ Errado. O índice 2 nem existe.",
+            "Imprime 10": "❌ O 10 está no índice 1.",
+            "Erro: ArrayIndexOutOfBoundsException": "✅ Boom! Você tentou acessar uma gaveta que não existe no armário[cite: 1].",
+            "Imprime nulo": "❌ Primitivos não são nulos e o erro impede a impressão."
         },
-        "tip": "Cuidado com o erro clássico de 'fora de limite'."
+        "tip": "Um vetor de tamanho 2 só tem os índices 0 e 1."
     },
     {
         "id": "M2-2", "level": "Médio",
-        "prompt": "Para percorrer o vetor 'notas', qual o cabeçalho correto do loop?",
-        "options": ["for(int i=0; i<=notas.length; i++)", "for(int i=1; i<=notas.length; i++)", "for(int i=0; i<notas.length; i++)", "for(int i=0; i<10; i++)"],
+        "prompt": "Qual o loop 'for' correto para percorrer o vetor 'notas' sem causar erro?",
+        "options": ["for(int i=0; i<=notas.length; i++)", "for(int i=1; i<notas.length; i++)", "for(int i=0; i<notas.length; i++)", "for(int i=0; i<10; i++)"],
         "answer": "for(int i=0; i<notas.length; i++)",
         "rationale": {
-            "for(int i=0; i<=notas.length; i++)": "❌ O <= causará erro no último índice.",
-            "for(int i=0; i<notas.length; i++)": "✅ Perfeito! Começa no 0 e para antes do length[cite: 1].",
-            "for(int i=1; i<=notas.length; i++)": "❌ Perderia o primeiro elemento (0)."
+            "for(int i=0; i<=notas.length; i++)": "❌ O '=' fará o loop tentar acessar um índice inexistente no final.",
+            "for(int i=1; i<notas.length; i++)": "❌ O loop pularia o primeiro elemento (índice 0).",
+            "for(int i=0; i<notas.length; i++)": "✅ Perfeito! Começa no zero e vai até o último válido[cite: 1].",
+            "for(int i=0; i<10; i++)": "❌ Arriscado. E se o vetor não tiver tamanho 10?"
         },
-        "tip": "A condição deve ser sempre i < length."
+        "tip": "Sempre use i < vetor.length no seu loop."
     },
     {
         "id": "M2-3", "level": "Médio",
-        "prompt": "O Bowser quer mudar o valor da primeira posição. Como ele faz?",
-        "options": ["vetor[0] = 10;", "vetor.first = 10;", "vetor[1] = 10;", "set(vetor, 10);"],
-        "answer": "vetor[0] = 10;",
+        "prompt": "O que faz o loop 'for-each' abaixo? `for(int x : moedas) { System.out.println(x); }`?",
+        "options": ["Imprime os índices", "Imprime o conteúdo de cada gaveta", "Multiplica as moedas", "Deleta o vetor"],
+        "answer": "Imprime o conteúdo de cada gaveta",
         "rationale": {
-            "vetor[0] = 10;": "✅ Direto na gaveta 0!",
-            "vetor[1] = 10;": "❌ Isso mudaria a segunda posição."
+            "Imprime os índices": "❌ O for-each não te dá o índice, apenas o valor direto.",
+            "Imprime o conteúdo de cada gaveta": "✅ Isso! É uma forma curta e elegante de ler todo o vetor[cite: 1].",
+            "Multiplica as moedas": "❌ Não há operação de multiplicação no código.",
+            "Deleta o vetor": "❌ O loop apenas lê os dados."
         },
-        "tip": "Use o operador de atribuição = junto com o índice."
+        "tip": "Use for-each quando não precisar do número do índice (i)."
     },
     {
         "id": "M2-4", "level": "Médio",
-        "prompt": "Qual o resultado de: int[] v={4, 8, 15}; System.out.println(v[1] + v[2]);",
-        "options": ["12", "23", "27", "15"],
-        "answer": "23",
+        "prompt": "Se `int[] p = {2, 4, 6, 8};`, qual o resultado de `p[0] + p[3]`?",
+        "options": ["6", "10", "12", "14"],
+        "answer": "10",
         "rationale": {
-            "23": "✅ v[1] é 8 e v[2] é 15. 8 + 15 = 23.",
-            "12": "❌ Você somou v[0] e v[1].",
-            "27": "❌ Valor incorreto."
+            "6": "❌ Você somou p[0] e p[1].",
+            "10": "✅ Wahoo! 2 (p[0]) + 8 (p[3]) = 10.",
+            "12": "❌ Erro de cálculo.",
+            "14": "❌ Erro de cálculo."
         },
-        "tip": "Identifique o conteúdo de cada posição antes de somar[cite: 1]."
+        "tip": "Sempre identifique o valor dentro da posição antes de operar."
     },
     {
         "id": "M2-5", "level": "Médio",
-        "prompt": "O loop for-each (for(int x : vetor)) serve para:",
-        "options": ["Alterar valores do vetor", "Apenas ler os valores", "Inverter o vetor", "Deletar o vetor"],
-        "answer": "Apenas ler os valores",
+        "prompt": "Vetores são estruturas 'unidimensionais'. Na aula, isso foi comparado a:",
+        "options": ["Um armário horizontal com gavetas", "Uma pilha de pratos", "Um prédio de vários andares", "Uma teia de aranha"],
+        "answer": "Um armário horizontal com gavetas",
         "rationale": {
-            "Apenas ler os valores": "✅ Sim! Ele é prático para exibição e cálculos simples[cite: 1].",
-            "Alterar valores": "❌ Para alterar, precisamos do índice (i), que o for-each não fornece."
+            "Um armário horizontal com gavetas": "✅ Exato! Uma linha de divisões diretas[cite: 1].",
+            "Uma pilha de pratos": "❌ Pilha é outro tipo de estrutura (LIFO).",
+            "Um prédio de vários andares": "❌ Isso seria uma matriz (bidimensional).",
+            "Uma teia de aranha": "❌ Isso seria um grafo."
         },
-        "tip": "For-each é ótimo para o 'Boletim Final' (leitura)."
+        "tip": "Pense em uma régua ou uma linha de gavetas numeradas[cite: 1]."
     },
 
-    # --- DIFÍCIL (Mundo 3: Water World) ---
+    # MUNDO 3 - DIFÍCIL
     {
         "id": "M3-1", "level": "Difícil",
-        "prompt": "Como calcular a média de um vetor 'notas' de 10 posições?",
-        "options": ["soma / 10.0", "soma * 10", "notas.average()", "soma / notas[9]"],
-        "answer": "soma / 10.0",
+        "prompt": "Para calcular a média da turma, o que devemos fazer primeiro?",
+        "options": ["Multiplicar as notas", "Somar todos os elementos do vetor", "Achar a maior nota", "Dividir o primeiro pelo último"],
+        "answer": "Somar todos os elementos do vetor",
         "rationale": {
-            "soma / 10.0": "✅ Soma-se tudo e divide pelo length (que é 10)[cite: 1].",
-            "notas.average()": "❌ Arrays nativos não possuem esse método direto."
+            "Multiplicar as notas": "❌ Isso não faz parte do cálculo de média.",
+            "Somar todos os elementos do vetor": "✅ Correto! Acumulamos a soma para depois dividir pelo length[cite: 1].",
+            "Achar a maior nota": "❌ Isso serve para estatística, não para a média geral.",
+            "Dividir o primeiro pelo último": "❌ Lógica incorreta."
         },
-        "tip": "Use uma variável acumuladora dentro de um loop."
+        "tip": "Use uma variável `double soma = 0;` e um loop."
     },
     {
         "id": "M3-2", "level": "Difícil",
-        "prompt": "Para achar o MAIOR valor no vetor 'medias', qual a lógica correta?",
-        "options": ["if(m > maior) { maior = m; }", "if(m < maior) { maior = m; }", "maior = medias.max();", "maior = medias[10];"],
-        "answer": "if(m > maior) { maior = m; }",
+        "prompt": "Temos dois vetores: `nomes` e `notas`. Para saber a nota da 'Ana' (índice 0), usamos:",
+        "options": ["nomes[0] e notas[0]", "nomes[0] e notas[1]", "nomes[Ana] e notas[Ana]", "Não é possível"],
+        "answer": "nomes[0] e notas[0]",
         "rationale": {
-            "if(m > maior) { maior = m; }": "✅ Se o valor atual for maior que o guardado, atualizamos o trono[cite: 1].",
-            "if(m < maior)": "❌ Isso acharia o menor valor."
+            "nomes[0] e notas[0]": "✅ Sim! Vetores paralelos usam o mesmo índice para relacionar dados[cite: 1].",
+            "nomes[0] e notas[1]": "❌ Isso pegaria a nota da pessoa errada.",
+            "nomes[Ana] e notas[Ana]": "❌ Índices devem ser números inteiros, não nomes.",
+            "Não é possível": "❌ É perfeitamente possível e comum."
         },
-        "tip": "Inicie a variável 'maior' com a primeira posição do vetor."
+        "tip": "O índice é o 'apontador' que une as informações de vetores diferentes[cite: 1]."
     },
     {
         "id": "M3-3", "level": "Difícil",
-        "prompt": "Considerando vetores paralelos (nomes e notas), se o maior valor está no índice 3 de 'notas', onde está o nome do dono?",
-        "options": ["Índice 0 de nomes", "Índice 3 de nomes", "Índice 4 de nomes", "Não há relação"],
-        "answer": "Índice 3 de nomes",
+        "prompt": "Como inicializar o 'maior valor' ao buscar o máximo em um vetor de notas?",
+        "options": ["maior = 0;", "maior = notas[0];", "maior = 100;", "maior = -1;"],
+        "answer": "maior = notas[0];",
         "rationale": {
-            "Índice 3 de nomes": "✅ Exato! A relação é mantida pelo índice compartilhado[cite: 1].",
-            "Não há relação": "❌ Há sim, se os vetores forem populados em ordem paralela."
+            "maior = 0;": "⚠️ Funciona para notas, mas e se todos os valores fossem negativos?",
+            "maior = notas[0];": "✅ Melhor prática! Começamos comparando com o primeiro elemento real[cite: 1].",
+            "maior = 100;": "❌ Errado. Você nunca acharia um valor maior que 100 se ele não existisse.",
+            "maior = -1;": "⚠️ Funciona para notas, mas não é universal."
         },
-        "tip": "O 'apontador' serve para os dois vetores ao mesmo tempo."
+        "tip": "Sempre inicie buscas de extremos com um valor presente no próprio vetor."
     },
     {
         "id": "M3-4", "level": "Difícil",
-        "prompt": "O que este código faz? for(int i=0; i<v.length/2; i++) { ... }",
-        "options": ["Percorre o vetor todo", "Percorre apenas a metade", "Dá erro de compilação", "Multiplica o vetor"],
-        "answer": "Percorre apenas a metade",
+        "prompt": "Qual a saída deste código: `int[] v = {1, 2, 3}; v[1] = 10; System.out.println(v[1]);`?",
+        "options": ["2", "1", "10", "3"],
+        "answer": "10",
         "rationale": {
-            "Percorre apenas a metade": "✅ Útil para algoritmos de inversão de valores.",
-            "Percorre o vetor todo": "❌ O limite é length dividido por 2."
+            "2": "❌ O 2 foi sobrescrito pela nova atribuição.",
+            "1": "❌ O 1 está no índice 0.",
+            "10": "✅ Correto! Você atualizou o conteúdo daquela gaveta específica[cite: 1].",
+            "3": "❌ O 3 está no índice 2."
         },
-        "tip": "Operações aritméticas podem ser usadas no limite do loop[cite: 1]."
+        "tip": "Vetores permitem alteração de valores (atribuição) após a criação."
     },
     {
         "id": "M3-5", "level": "Difícil",
-        "prompt": "Como instanciar um vetor de inteiros já com os valores 1, 2, 3?",
-        "options": ["int[] v = {1, 2, 3};", "int v = [1, 2, 3];", "new Array(1,2,3);", "int[] v = new int(3);"],
-        "answer": "int[] v = {1, 2, 3};",
+        "prompt": "Para imprimir apenas as notas maiores ou iguais a 7 (Aprovados), qual o 'if' correto?",
+        "options": ["if(notas[i] > 7)", "if(notas[i] >= 7)", "if(notas == 7)", "if(i >= 7)"],
+        "answer": "if(notas[i] >= 7)",
         "rationale": {
-            "int[] v = {1, 2, 3};": "✅ Inicialização estática direta.",
-            "int v = [1, 2, 3];": "❌ Sintaxe de outras linguagens (como Python/JS)."
+            "if(notas[i] > 7)": "❌ Isso excluiria quem tirou exatamente 7.",
+            "if(notas[i] >= 7)": "✅ Perfeito! Inclui o 7 e valores superiores[cite: 1].",
+            "if(notas == 7)": "❌ Você está comparando o vetor inteiro com um número (erro).",
+            "if(i >= 7)": "❌ Você está testando o índice, não a nota."
         },
-        "tip": "As chaves {} são usadas para inicializar valores em Java[cite: 1]."
+        "tip": "Lembre-se de comparar o CONTEÚDO (notas[i]), não o ÍNDICE (i)."
     },
 
-    # --- DESAFIADOR (Castelo do Bowser) ---
+    # CASTELO DO BOWSER - DESAFIADOR
     {
         "id": "CH-1", "level": "Desafiador",
-        "prompt": "Qual o valor final de 'cont' se v={5, 9, 2, 8, 4} e o loop for: if(v[i]%2==0) cont++;",
-        "options": ["2", "3", "5", "0"],
-        "answer": "3",
+        "prompt": "O que acontece se você fizer `int[] a = {1, 2}; int[] b = a; b[0] = 9;` e imprimir `a[0]`?",
+        "options": ["Imprime 1", "Imprime 9", "Erro de compilação", "Imprime 2"],
+        "answer": "Imprime 9",
         "rationale": {
-            "3": "✅ Os números pares são 2, 8 e 4. O contador subiu 3 vezes.",
-            "2": "❌ Você esqueceu de um número par."
+            "1": "❌ Errado. Em Java, vetores são objetos. 'b' e 'a' apontam para o mesmo armário.",
+            "9": "✅ Exato! Ao mudar 'b', você muda o mesmo armário que 'a' está olhando.",
+            "Erro de compilação": "❌ O código é perfeitamente válido.",
+            "2": "❌ O 2 está no índice 1."
         },
-        "tip": "O operador %2==0 identifica números pares."
+        "tip": "Vetores em Java funcionam por referência."
     },
     {
         "id": "CH-2", "level": "Desafiador",
-        "prompt": "Se v={10, 20, 30} e fazemos: v[0] = v[2]; v[2] = v[0]; qual o estado final de v?",
-        "options": ["{30, 20, 10}", "{30, 20, 30}", "{10, 20, 30}", "{30, 30, 30}"],
-        "answer": "{30, 20, 30}",
+        "prompt": "Como inverter o valor de `v[0]` com `v[1]` sem perder dados?",
+        "options": ["v[0]=v[1]; v[1]=v[0];", "int aux=v[0]; v[0]=v[1]; v[1]=aux;", "v[0]=v[1];", "int aux=v[1]; v[1]=v[1];"],
+        "answer": "int aux=v[0]; v[0]=v[1]; v[1]=aux;",
         "rationale": {
-            "{30, 20, 30}": "✅ Atenção! Na segunda linha, v[0] já vale 30. Para inverter, precisaríamos de uma variável 'aux'.",
-            "{30, 20, 10}": "❌ Sem variável auxiliar, o valor original de v[0] (10) se perdeu."
+            "v[0]=v[1]; v[1]=v[0];": "❌ Errado. O valor original de v[0] seria apagado na primeira linha.",
+            "int aux=v[0]; v[0]=v[1]; v[1]=aux;": "✅ Bingo! A gaveta 'aux' guarda o valor para não o perdermos durante a troca.",
+            "v[0]=v[1];": "❌ Só copia, não inverte.",
+            "int aux=v[1]; v[1]=v[1];": "❌ Lógica sem sentido."
         },
-        "tip": "Lógica de troca (swap) exige uma terceira gaveta temporária."
+        "tip": "Sempre use uma variável auxiliar para 'swaps'."
     },
     {
         "id": "CH-3", "level": "Desafiador",
-        "prompt": "Como imprimir o vetor de trás para frente?",
-        "options": ["for(int i=v.length-1; i>=0; i--)", "for(int i=v.length; i>0; i--)", "for(int i=0; i<v.length; i--)", "v.reverse().print()"],
-        "answer": "for(int i=v.length-1; i>=0; i--)",
+        "prompt": "Se `int[] x = {2, 0, 1};`, qual o valor de `x[x[0]]`?",
+        "options": ["2", "0", "1", "Erro"],
+        "answer": "1",
         "rationale": {
-            "for(int i=v.length-1; i>=0; i--)": "✅ Começa no último índice e vai subtraindo até chegar no 0.",
-            "for(int i=v.length; i>0; i--)": "❌ Erro: v.length é um índice inválido."
+            "2": "❌ x[0] é 2, mas queremos x[2].",
+            "0": "❌ Este seria o valor de x[1].",
+            "1": "✅ Mestre da Lógica! x[0] é 2. Logo, x[x[0]] é x[2]. O valor em x[2] é 1.",
+            "Erro": "❌ O código é válido, pois 2 é um índice existente."
         },
-        "tip": "O decremento i-- é a chave aqui."
+        "tip": "Resolva o índice de dentro dos colchetes primeiro."
     },
     {
         "id": "CH-4", "level": "Desafiador",
-        "prompt": "Qual o resultado de v[v[0]] se v={2, 1, 0}?",
-        "options": ["0", "1", "2", "Erro"],
-        "answer": "0",
+        "prompt": "Qual o resultado de `15 % 4`? (Operador usado para verificar índices pares/ímpares)",
+        "options": ["3", "1", "0", "4"],
+        "answer": "3",
         "rationale": {
-            "0": "✅ v[0] é 2. Então v[v[0]] vira v[2]. O valor em v[2] é 0.",
-            "2": "❌ v[0] é 2, mas você quer o conteúdo dessa posição."
+            "3": "✅ Correto! 15 dividido por 4 é 3, com resto 3.",
+            "1": "❌ Resto incorreto.",
+            "0": "❌ Não é uma divisão exata.",
+            "4": "❌ O resto nunca pode ser igual ou maior que o divisor."
         },
-        "tip": "Resolva de dentro para fora: primeiro o índice interno[cite: 1]."
+        "tip": "O operador % (módulo) retorna o resto da divisão."
     },
     {
         "id": "CH-5", "level": "Desafiador",
-        "prompt": "No exercício da Máquina de Bebidas, se o cliente digita '5' e o vetor tem 5 itens, por que usamos menu[opcao - 1]?",
-        "options": ["Porque o array começa em 0", "Porque o item 5 é vazio", "Para arredondar o número", "É opcional"],
-        "answer": "Porque o array começa em 0",
+        "prompt": "Para percorrer um vetor de trás para frente, como deve ser o loop?",
+        "options": ["for(int i=length; i>0; i--)", "for(int i=length-1; i>=0; i--)", "for(int i=0; i<length; i--)", "for(int i=length-1; i>0; i--)"],
+        "answer": "for(int i=length-1; i>=0; i--)",
         "rationale": {
-            "Porque o array começa em 0": "✅ Exato! O item 5 para o humano é o índice 4 para o Java[cite: 1].",
-            "É opcional": "❌ Se não subtrair, dará erro de 'fora de limite'."
+            "for(int i=length; i>0; i--)": "❌ Erro: length é um índice inválido (out of bounds).",
+            "for(int i=length-1; i>=0; i--)": "✅ Wahoo! Começa no último índice e para no zero, descendo[cite: 1].",
+            "for(int i=0; i<length; i--)": "❌ Loop infinito ou erro imediato.",
+            "for(int i=length-1; i>0; i--)": "❌ Esqueceria o elemento do índice zero."
         },
-        "tip": "Sempre mapeie a entrada do usuário para o índice real[cite: 1]."
+        "tip": "Comece em length-1 e use o decremento i--."
     }
 ]
 
 # =========================
-# LÓGICA DO APP (Streamlit)
+# LÓGICA DE NAVEGAÇÃO E SESSÃO
 # =========================
-def reset_all():
+if "q_order" not in st.session_state:
     order = list(range(len(QUESTIONS)))
     random.shuffle(order)
     st.session_state.q_order = order
-    st.session_state.q_index = 0
-    st.session_state.base_correct = 0
-    st.session_state.final_points = 0
+    st.session_state.q_idx = 0
+    st.session_state.corrects = 0
+    st.session_state.points = 0
     st.session_state.streak = 0
     st.session_state.max_streak = 0
     st.session_state.show_feedback = False
     st.session_state.last_choice = None
-    st.session_state.last_q = None
-
-if "student_name" not in st.session_state:
     st.session_state.student_name = ""
-if "q_order" not in st.session_state:
-    reset_all()
 
-# UI Lateral
-st.sidebar.image("https://img.icons8.com/color/512/super-mario.png", width=100)
-st.sidebar.title("World Select")
-if st.sidebar.button("Reiniciar Aventura"):
-    reset_all()
+# Sidebar
+st.sidebar.image("https://img.icons8.com/color/512/super-mario.png", width=80)
+st.sidebar.title("Menu do Jogo")
+if st.sidebar.button("Trocar Jogador / Reiniciar"):
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
     st.rerun()
 
-# --- TELA DE LOGIN ---
+# --- LOGIN ---
 if not st.session_state.student_name:
-    st.subheader("🍄 Digite seu nome para começar a jornada!")
-    nome = st.text_input("Player Name:", placeholder="Mario")
-    if st.button("Press Start"):
-        if len(nome.strip()) >= 3:
-            st.session_state.student_name = nome.strip()
-            reset_all()
+    st.info("Bem-vindo, Recruta! Identifique-se para começar o treinamento de Vetores.")
+    name_input = st.text_input("Nome do Player:", placeholder="Ex: Mario Silva")
+    if st.button("PRESS START"):
+        if len(name_input.strip()) >= 3:
+            st.session_state.student_name = name_input.strip()
             st.rerun()
         else:
-            st.warning("O nome deve ter pelo menos 3 letras.")
+            st.error("O nome deve ter pelo menos 3 caracteres.")
 else:
-    # --- JOGO EM ANDAMENTO ---
-    total = len(QUESTIONS)
-    if st.session_state.q_index < total:
-        qpos = st.session_state.q_order[st.session_state.q_index]
-        q = QUESTIONS[qpos]
+    # --- JOGO ---
+    total_q = len(QUESTIONS)
+    
+    if st.session_state.q_idx < total_q:
+        q_real_idx = st.session_state.q_order[st.session_state.q_idx]
+        q = QUESTIONS[q_real_idx]
         
-        # Header Status
-        st.info(f"📍 {st.session_state.student_name} | Questão {st.session_state.q_index + 1}/{total} | 🔥 Streak: {st.session_state.streak}")
+        # Barra de Progresso e Stats
+        st.progress(st.session_state.q_idx / total_q)
+        c1, c2, c3 = st.columns(3)
+        c1.write(f"🎮 **Player:** {st.session_state.student_name}")
+        c2.write(f"🔥 **Streak:** {st.session_state.streak}")
+        c3.write(f"🪙 **Moedas:** {st.session_state.points}")
         
-        # Difficulty Progress
-        colors = {"Fácil": "green", "Médio": "orange", "Difícil": "red", "Desafiador": "purple"}
-        st.markdown(f"**Dificuldade:** :{colors[q['level']]}[{q['level']}]")
-        st.progress((st.session_state.q_index) / total)
-
-        st.markdown(f"### {q['prompt']}")
+        st.divider()
+        st.markdown(f"### Missão {st.session_state.q_idx + 1}: {q['level']}")
+        st.markdown(f"**{q['prompt']}**")
         
-        # Opções
         if not st.session_state.show_feedback:
-            choice = st.radio("Selecione a resposta:", q["options"], key=f"q_{q['id']}")
-            if st.button("Confirmar ✅"):
+            # Seleção de resposta
+            choice = st.radio("Escolha sua estratégia:", q["options"], key=f"radio_{q['id']}")
+            if st.button("CONFIRMAR ✅"):
                 st.session_state.last_choice = choice
-                st.session_state.last_q = q
                 st.session_state.show_feedback = True
                 
-                # Lógica de Pontos
-                if choice == q["answer"]:
-                    st.session_state.base_correct += 1
+                # Validação
+                is_correct = (choice == q["answer"])
+                ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+                
+                if is_correct:
+                    st.session_state.corrects += 1
                     st.session_state.streak += 1
                     st.session_state.max_streak = max(st.session_state.max_streak, st.session_state.streak)
-                    bonus = max(0, st.session_state.streak - 1)
-                    st.session_state.final_points += 10 + (bonus * 5) # 10 pontos base + bônus
+                    # Bônus de moedas por streak
+                    st.session_state.points += (10 + (st.session_state.streak * 2))
                 else:
                     st.session_state.streak = 0
+                
+                # Log de Resposta
+                with open(ANSWERS_FILE, "a", newline="", encoding="utf-8") as f:
+                    csv.writer(f).writerow([ts, st.session_state.student_name, q["id"], q["level"], int(is_correct)])
+                
                 st.rerun()
         else:
-            # Feedback
-            q = st.session_state.last_q
+            # EXIBIÇÃO DE FEEDBACK COM .get() PARA EVITAR KEYERROR
             choice = st.session_state.last_choice
+            is_correct = (choice == q["answer"])
             
-            if choice == q["answer"]:
-                st.success(f"⭐ **HERE WE GO!** {q['rationale'][choice]}")
+            # Busca a explicação. Se não existir no rationale, usa uma mensagem padrão.
+            feedback_text = q["rationale"].get(choice, "Essa alternativa não parece ser a resposta correta para este desafio.")
+            
+            if is_correct:
+                st.success(f"⭐ **WAHOO!** {feedback_text}")
             else:
-                st.error(f"🍄 **MAMMA MIA!** {q['rationale'][choice]}")
-                st.warning(f"A resposta correta era: **{q['answer']}**")
+                st.error(f"💀 **MAMMA MIA!** {feedback_text}")
+                st.info(f"💡 **Dica do Toad:** {q['tip']}")
+                st.warning(f"A resposta certa era: **{q['answer']}**")
             
-            st.markdown(f"💡 **Dica do Toad:** {q['tip']}")
-            
-            if st.button("Próxima Fase ➡️"):
-                st.session_state.q_index += 1
+            if st.button("PRÓXIMA FASE ➡️"):
+                st.session_state.q_idx += 1
                 st.session_state.show_feedback = False
                 st.rerun()
+    
     else:
-        # --- FINAL ---
+        # --- FIM DE JOGO ---
         st.balloons()
-        st.success(f"🏆 PARABÉNS, {st.session_state.student_name.upper()}! VOCÊ RESGATOU A PRINCESA (E O CÓDIGO)!")
-        col1, col2 = st.columns(2)
-        col1.metric("Acertos", f"{st.session_state.base_correct}/{total}")
-        col2.metric("Moedas (Pontos)", st.session_state.final_points)
+        st.success(f"🎊 PARABÉNS, {st.session_state.student_name.upper()}! VOCÊ CONCLUIU O TREINAMENTO!")
         
-        if st.button("Jogar Novamente 🔁"):
-            reset_all()
+        percent = (st.session_state.corrects / total_q) * 100
+        
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Acertos Oficiais", f"{st.session_state.corrects}/{total_q}")
+        col2.metric("Moedas Totais", st.session_state.points)
+        col3.metric("Maior Streak", st.session_state.max_streak)
+        
+        st.markdown(f"### Sua nota final de precisão: **{percent:.1f}%**")
+        
+        # Salva Score Final
+        ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        with open(SCORES_FILE, "a", newline="", encoding="utf-8") as f:
+            csv.writer(f).writerow([
+                ts, st.session_state.student_name, 
+                st.session_state.corrects, st.session_state.points, 
+                total_q, f"{percent:.2f}", st.session_state.max_streak
+            ])
+        
+        if st.button("RECOMEÇAR AVENTURA 🔁"):
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
             st.rerun()
