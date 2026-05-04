@@ -18,40 +18,150 @@ st.set_page_config(
 )
 
 # -----------------------------
-# CSS / identidade visual
+# CSS / identidade visual — versão UX aprimorada
 # -----------------------------
 st.markdown(
     """
     <style>
-    .stApp { background: linear-gradient(180deg, #f7fbff 0%, #fffdf4 100%); }
-    .big-title { font-size: 2.2rem; font-weight: 900; margin-bottom: .2rem; }
-    .subtitle { font-size: 1.1rem; color: #444; margin-bottom: 1rem; }
-    .card {
-        background: white; border: 3px solid #222; border-radius: 18px;
-        padding: 22px; box-shadow: 6px 6px 0px #222; margin: 12px 0;
+    :root {
+        --sky-1: #e8f5ff;
+        --sky-2: #fff7d6;
+        --ink: #1f2937;
+        --muted: #5f6b7a;
+        --card: rgba(255,255,255,.94);
+        --red: #e74c3c;
+        --red-dark: #b83227;
+        --yellow: #f1c40f;
+        --green: #2ecc71;
+        --blue: #3498db;
+        --shadow: 7px 7px 0px #1f2937;
+        --radius: 22px;
     }
-    .question-card {
-        background: #ffffff; border: 3px solid #e74c3c; border-radius: 18px;
-        padding: 24px; box-shadow: 6px 6px 0px #222; margin: 12px 0;
+
+    .stApp {
+        background:
+            radial-gradient(circle at 10% 15%, rgba(241,196,15,.22), transparent 24%),
+            radial-gradient(circle at 88% 10%, rgba(52,152,219,.18), transparent 28%),
+            linear-gradient(180deg, var(--sky-1) 0%, #ffffff 48%, var(--sky-2) 100%);
+        color: var(--ink);
     }
-    .concept-pill {
-        display: inline-block; padding: 5px 10px; border-radius: 999px;
-        background: #f1c40f; color: #111; font-weight: 800; margin-right: 8px;
-        border: 2px solid #222;
+
+    .block-container { padding-top: 1.5rem; max-width: 1280px; }
+
+    .hero {
+        background: linear-gradient(135deg, #ffffff 0%, #fff7d6 52%, #ffe3df 100%);
+        border: 3px solid var(--ink);
+        border-radius: 28px;
+        padding: 26px 30px;
+        box-shadow: var(--shadow);
+        margin-bottom: 18px;
+        position: relative;
+        overflow: hidden;
     }
-    .level-pill {
-        display: inline-block; padding: 5px 10px; border-radius: 999px;
-        background: #e74c3c; color: white; font-weight: 800; border: 2px solid #222;
+    .hero::after {
+        content: "🍄 🧱 ⭐ 🪙 🏰";
+        position: absolute;
+        right: 22px;
+        top: 16px;
+        font-size: 2.2rem;
+        opacity: .22;
+        letter-spacing: 8px;
     }
-    .code-box {
-        background: #111827; color: #e5e7eb; border-radius: 12px; padding: 14px;
-        font-family: Consolas, Monaco, monospace; white-space: pre-wrap; border: 3px solid #222;
+    .big-title { font-size: 2.7rem; font-weight: 950; margin-bottom: .25rem; line-height: 1.05; }
+    .subtitle { font-size: 1.08rem; color: var(--muted); max-width: 850px; margin-bottom: .7rem; }
+    .hero-tags span {
+        display: inline-block; margin: 4px 6px 0 0; padding: 6px 12px;
+        border-radius: 999px; border: 2px solid var(--ink); background: white;
+        font-weight: 800; font-size: .92rem;
     }
+
+    .card, .question-card, .teacher-card {
+        background: var(--card);
+        border: 3px solid var(--ink);
+        border-radius: var(--radius);
+        padding: 24px;
+        box-shadow: var(--shadow);
+        margin: 14px 0;
+    }
+    .question-card { border-color: var(--red); }
+    .teacher-card { border-color: var(--blue); }
+
+    .concept-pill, .level-pill, .mode-pill {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-weight: 900;
+        margin: 2px 7px 10px 0;
+        border: 2px solid var(--ink);
+    }
+    .concept-pill { background: var(--yellow); color: #111; }
+    .level-pill { background: var(--red); color: white; }
+    .mode-pill { background: var(--blue); color: white; }
+
+    .objective-box {
+        background: #f8fafc;
+        border-left: 8px solid var(--blue);
+        border-radius: 14px;
+        padding: 12px 14px;
+        margin: 10px 0 14px 0;
+        color: #334155;
+        font-weight: 650;
+    }
+
+    .stepper { display: flex; gap: 7px; margin: 12px 0 18px 0; flex-wrap: wrap; }
+    .step {
+        min-width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;
+        border: 2px solid var(--ink); border-radius: 999px; font-weight: 900; background: white;
+        box-shadow: 2px 2px 0px var(--ink); font-size: .85rem;
+    }
+    .step.done { background: var(--green); color: white; }
+    .step.current { background: var(--yellow); color: #111; transform: translateY(-2px); }
+
+    .microcopy {
+        color: var(--muted); font-size: .95rem; line-height: 1.45;
+        background: rgba(255,255,255,.72); border: 2px dashed #cbd5e1; border-radius: 14px;
+        padding: 12px 14px; margin-top: 10px;
+    }
+
+    .success-panel {
+        border: 3px solid #16a34a; background: #ecfdf5; border-radius: 18px;
+        padding: 16px; margin: 12px 0; box-shadow: 4px 4px 0px #1f2937;
+    }
+    .error-panel {
+        border: 3px solid #dc2626; background: #fff1f2; border-radius: 18px;
+        padding: 16px; margin: 12px 0; box-shadow: 4px 4px 0px #1f2937;
+    }
+
+    .stTabs [data-baseweb="tab-list"] { gap: 10px; }
+    .stTabs [data-baseweb="tab"] {
+        background: rgba(255,255,255,.72); border: 2px solid #d6d3d1; border-radius: 14px 14px 0 0;
+        padding: 10px 16px; font-weight: 850;
+    }
+    .stTabs [aria-selected="true"] { background: white; border-color: var(--ink); }
+
     div.stButton > button {
-        border-radius: 10px; min-height: 3.1rem; font-weight: 900;
-        border: 2px solid #222; box-shadow: 3px 3px 0px #222;
+        border-radius: 14px; min-height: 3.05rem; font-weight: 900;
+        border: 2px solid var(--ink); box-shadow: 3px 3px 0px var(--ink);
+        transition: transform .08s ease, box-shadow .08s ease;
     }
-    [data-testid="stMetricValue"] { font-weight: 900; }
+    div.stButton > button:hover { transform: translateY(-1px); box-shadow: 4px 4px 0px var(--ink); }
+    div.stButton > button:active { transform: translateY(2px); box-shadow: 1px 1px 0px var(--ink); }
+
+    [data-testid="stMetric"] {
+        background: rgba(255,255,255,.82); border: 2px solid #e5e7eb; border-radius: 18px;
+        padding: 12px 14px; box-shadow: 3px 3px 0px rgba(31,41,55,.35);
+    }
+    [data-testid="stMetricValue"] { font-weight: 950; }
+
+    code, pre { border-radius: 14px !important; }
+    .stRadio label { font-size: 1.02rem; }
+
+    @media (max-width: 700px) {
+        .big-title { font-size: 2rem; }
+        .hero { padding: 20px; }
+        .hero::after { display: none; }
+        .card, .question-card, .teacher-card { padding: 18px; }
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -568,11 +678,40 @@ def safe_read_csv(path, cols):
     except Exception:
         return pd.DataFrame(columns=cols)
 
+
+def render_stepper(total: int, current: int) -> None:
+    """Renderiza um indicador visual de progresso mais claro que apenas a barra."""
+    html = ["<div class='stepper'>"]
+    for idx in range(total):
+        cls = "step"
+        label = str(idx + 1)
+        if idx < current:
+            cls += " done"
+            label = "✓"
+        elif idx == current:
+            cls += " current"
+        html.append(f"<span class='{cls}'>{label}</span>")
+    html.append("</div>")
+    st.markdown("".join(html), unsafe_allow_html=True)
+
 # -----------------------------
 # Cabeçalho
 # -----------------------------
-st.markdown("<div class='big-title'>🍄 Super Vector Bros</div>", unsafe_allow_html=True)
-st.markdown("<div class='subtitle'>Missão didática: dominar vetores em Java com desafios curtos, feedback imediato e revisão por erro.</div>", unsafe_allow_html=True)
+st.markdown(
+    """
+    <div class='hero'>
+        <div class='big-title'>🍄 Super Vector Bros</div>
+        <div class='subtitle'>Uma experiência gamificada para aprender vetores em Java: primeiro entender, depois aplicar, errar com segurança e revisar com dados da turma.</div>
+        <div class='hero-tags'>
+            <span>🧱 Índices sem trauma</span>
+            <span>🪙 For + length</span>
+            <span>⭐ Feedback imediato</span>
+            <span>🏰 Painel do professor</span>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 t_game, t_review, t_rank, t_teacher = st.tabs(["🎮 Jogar", "📚 Revisar", "🏆 Ranking", "👨‍🏫 Professor"])
 
@@ -583,6 +722,7 @@ with t_game:
     if game["screen"] == "SETUP":
         st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.subheader("Configuração da partida")
+        st.markdown("<div class='microcopy'>🎯 <strong>Objetivo da experiência:</strong> responder, receber feedback e revisar os erros. A pontuação ajuda no engajamento, mas o foco é aprender a pensar com vetores.</div>", unsafe_allow_html=True)
         c1, c2, c3 = st.columns([2, 1.5, 1])
         with c1:
             nome = st.text_input("Nome do jogador", placeholder="Digite seu nome")
@@ -622,10 +762,11 @@ with t_game:
         top3.metric("Acertos", f"{game['acertos']}/{total}")
         top4.metric("Sequência", f"🔥 {game['streak']}")
         st.progress(progress)
+        render_stepper(total, game["q_pos"])
 
         st.markdown("<div class='question-card'>", unsafe_allow_html=True)
         st.markdown(f"<span class='concept-pill'>{WORLDS[q['concept']]}</span> <span class='level-pill'>{q['level']}</span>", unsafe_allow_html=True)
-        st.caption(f"Objetivo: {q['objective']}")
+        st.markdown(f"<div class='objective-box'>🎯 Objetivo de aprendizagem: {q['objective']}</div>", unsafe_allow_html=True)
         st.subheader(q["prompt"])
         if q.get("code"):
             st.code(q["code"], language="java")
@@ -660,12 +801,9 @@ with t_game:
             correct = game["last_correct"]
             feedback = q["feedback"].get(choice, "Resposta registrada.")
             if correct:
-                st.success(f"⭐ Acertou! {feedback}")
-                st.write(f"🪙 Moedas nesta questão: **{game['last_points']}**")
+                st.markdown(f"<div class='success-panel'>⭐ <strong>Acertou!</strong><br>{feedback}<br><br>🪙 Moedas nesta questão: <strong>{game['last_points']}</strong></div>", unsafe_allow_html=True)
             else:
-                st.error(f"🐢 Quase! {feedback}")
-                st.info(f"🍄 Dica: {q['tip']}")
-                st.warning(f"Resposta esperada: **{q['answer']}**")
+                st.markdown(f"<div class='error-panel'>🐢 <strong>Quase!</strong><br>{feedback}<br><br>🍄 <strong>Dica:</strong> {q['tip']}<br>⭐ <strong>Resposta esperada:</strong> {q['answer']}</div>", unsafe_allow_html=True)
             st.caption(f"Tempo de resposta: {game['last_elapsed']:.1f}s")
 
             c1, c2 = st.columns([1, 1])
@@ -692,6 +830,7 @@ with t_game:
         st.balloons()
         st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.header("🏰 Castelo conquistado!")
+        st.markdown("<div class='microcopy'>Agora vem a parte mais importante: revisar os erros e transformar tentativa em aprendizagem. Use a aba <strong>📚 Revisar</strong> para retomar os conceitos.</div>", unsafe_allow_html=True)
         c1, c2, c3 = st.columns(3)
         c1.metric("Moedas", game["pontos"])
         c2.metric("Acertos", f"{game['acertos']}/{total}")
@@ -721,6 +860,7 @@ with t_game:
 with t_review:
     st.subheader("📚 Revisão por conceito")
     st.write("Use esta aba para retomar os pontos essenciais depois da partida ou antes do exercício no Eclipse/VS Code.")
+    st.markdown("<div class='microcopy'>💡 Sugestão didática: filtre apenas os conceitos que apareceram com menor acerto no painel do professor e faça uma retomada de 5 minutos antes do próximo código.</div>", unsafe_allow_html=True)
 
     concepts = sorted(set(q["concept"] for q in QUESTIONS))
     selected = st.multiselect("Filtrar conceitos", concepts, default=concepts)
@@ -767,8 +907,8 @@ with t_teacher:
     password = st.text_input("Código do professor", type="password")
     if password != PROFESSOR_PASSWORD:
         st.info("Digite o código do professor para visualizar o painel.")
-        st.stop()
     else:
+        st.markdown("<div class='teacher-card'>✅ Acesso liberado. Use os dados abaixo para decidir o que retomar na explicação final.</div>", unsafe_allow_html=True)
         df_resp = safe_read_csv(RESPONSES_FILE, RESPONSE_COLUMNS)
         if df_resp.empty:
             st.info("Ainda não há respostas registradas.")
