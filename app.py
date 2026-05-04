@@ -766,8 +766,8 @@ with t_teacher:
     PROFESSOR_PASSWORD = st.secrets.get("PROFESSOR_PASSWORD", "prof")
     password = st.text_input("Código do professor", type="password")
     if password != PROFESSOR_PASSWORD:
-    st.info("Digite o código do professor para visualizar o painel.")
-    st.stop()
+        st.info("Digite o código do professor para visualizar o painel.")
+        st.stop()
     else:
         df_resp = safe_read_csv(RESPONSES_FILE, RESPONSE_COLUMNS)
         if df_resp.empty:
